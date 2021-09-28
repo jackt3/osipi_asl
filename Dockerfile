@@ -26,16 +26,16 @@ WORKDIR /osipi
 COPY process_synthetic.py Code/process_synthetic.py
 
 RUN echo "Downloading fslinstaller.py" \
-	&& curl https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py -o fslinstaller.py\
+	&& curl https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py -o fslinstaller.py \
 	&& echo "Changing permissions for fslinstaller" \
 	&& chmod 755 fslinstaller.py \
 	&& echo "Running fslinstaller" \
-	&& echo "please ignore the 'failed to download miniconda' error coming soon" \
-	&& su -c "python2.7 fslinstaller.py -V 6.0.5 -d /osipi/fsl -q" \
+	&& mkdir /osipi/modules \
+	&& su -c "python2.7 fslinstaller.py -V 6.0.5 -d /osipi/modules/fsl -e -q" \
 	&& echo "Setting FSLDIR environment variable" \
-	&& export FSLDIR=/osipi/fsl \
+	&& export FSLDIR=/osipi/modules/fsl \
 	&& echo "retrying miniconda install ..." \
-	&& /osipi/fsl/etc/fslconf/post_install.sh \
-	&& mkdir -p /etc/fsl \
-	&& echo "FSLDIR=/osipi/fsl; . \${FSLDIR}/etc/fslconf/fsl.sh; PATH=\${FSLDIR}/bin:\${PATH}; export FSLDIR PATH" > /etc/fsl/fsl.sh
-
+	&& /osipi/modules/fsl/etc/fslconf/post_install.sh \
+	&& echo "FSLDIR=/osipi/modules/fsl" >> ~/.bashrc \
+	&& echo "PATH=\${FSLDIR}/bin:\${PATH}" >> ~/.bashrc \
+	&& echo "export FSLDIR PATH" >> ~/.bashrc
