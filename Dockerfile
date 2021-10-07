@@ -23,7 +23,8 @@ RUN apt-get install -y \
 	curl
 
 WORKDIR /osipi
-COPY process_synthetic.py Code/process_synthetic.py
+COPY process_osipi_all.py process_osipi_all.py
+COPY process_osipi_subject.py process_osipi_subject.py
 
 RUN echo "Downloading fslinstaller.py" \
 	&& curl https://fsl.fmrib.ox.ac.uk/fsldownloads/fslinstaller.py -o fslinstaller.py \
