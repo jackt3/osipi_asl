@@ -40,3 +40,18 @@ RUN echo "Downloading fslinstaller.py" \
 	&& echo "FSLDIR=/osipi/modules/fsl" >> ~/.bashrc \
 	&& echo "PATH=\${FSLDIR}/bin:\${PATH}" >> ~/.bashrc \
 	&& echo "export FSLDIR PATH" >> ~/.bashrc
+
+RUN echo "Downloading anaconda..." \
+    && wget https://repo.continuum.io/archive/Anaconda3-5.0.1-Linux-x86_64.sh \
+    && chmod 755 Anaconda3-5.0.1-Linux-x86_64.sh \
+    && echo "Installing anaconda..." \
+    && bash Anaconda3-5.0.1-Linux-x86_64.sh -b -p /osipi/conda \
+    && rm Anaconda3-5.0.1-Linux-x86_64.sh 
+    
+ENV PATH /osipi/conda/bin:$PATH
+    
+RUN echo "Creating environment for quantiphyse" \
+    && conda create -n qp python=3.7  \
+    && echo "conda activate qp" > ~/.bashrc \
+    && echo "Installing quantiphyse" \
+    && pip install quantiphyse
