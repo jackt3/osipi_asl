@@ -67,9 +67,9 @@ def run_cmd(subid, cmd, shell=False):
         logger.info(f"retcode={retcode}")
         logger.exception("Process failed.")
 
-def imcp_wrapper(name1, name2):
+def imcp_wrapper(subid, name1, name2):
     imcp_cmd = ["imcp", str(name1), str(name2)]
-    run_cmd(imcp_cmd)
+    run_cmd(subid, imcp_cmd)
 
 def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose=False, debug=False):
     #############################################################################
@@ -240,12 +240,12 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
     logger.info("Copying non-partial volume corrected results to expected locations.")
     native_dir = oxford_asl_out/"native_space"
     perfusion_calib = native_dir/"perfusion_calib.nii.gz"
-    imcp_wrapper(perfusion_calib, results_dir/"CBF.nii.gz")
+    imcp_wrapper(subid, perfusion_calib, results_dir/"CBF.nii.gz")
 
     # get GM and WM masks and move to expected location
     gm_mask, wm_mask = [native_dir/f"{t}_roi.nii.gz" for t in ("gm", "wm")]
     for mask_src, tissue in zip((gm_mask, wm_mask), ("GM", "WM")):
-        imcp_wrapper(mask_src, results_dir/f"{tissue}_mask_lowres.nii.gz")
+        imcp_wrapper(subid, mask_src, results_dir/f"{tissue}_mask_lowres.nii.gz")
 
     # names of mean ROI estimates
     gm_mean, wm_mean = [native_dir/f"perfusion_calib_{t}_mean.txt" for t in ("gm", "wm")]
@@ -262,14 +262,14 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
     logger.info("Copying partial volume corrected results and partial volume estimates to expected locations.")
     pvcorr_dir = native_dir/"pvcorr"
     pgm_perfusion_calib = pvcorr_dir/"perfusion_calib.nii.gz"
-    imcp_wrapper(pgm_perfusion_calib, results_dir/"CBF_GMpv.nii.gz")
+    imcp_wrapper(subid, pgm_perfusion_calib, results_dir/"CBF_GMpv.nii.gz")
     pwm_perfusion_calib = pvcorr_dir/"perfusion_wm_calib.nii.gz"
-    imcp_wrapper(pwm_perfusion_calib, results_dir/"CBF_WMpv.nii.gz")
+    imcp_wrapper(subid, pwm_perfusion_calib, results_dir/"CBF_WMpv.nii.gz")
 
     # move T1w space PVEs
     gm_pve, wm_pve = [fsl_anat_out/f"T1_fast_pve_{n}" for n in (0, 1)]
     for pve, t in zip((gm_pve, wm_pve), ("GM", "WM")):
-        imcp_wrapper(pve, results_dir/f"{t}_pv.nii.gz")
+        imcp_wrapper(subid, pve, results_dir/f"{t}_pv.nii.gz")
 
     # calculate standard deviation within tissue mask and write mean and std to file
     pgm_mean, pwm_mean = [native_dir/f"perfusion_{t}_mean.txt" for t in ("calib_gm", "wm_calib_wm")]
