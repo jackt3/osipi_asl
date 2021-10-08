@@ -3,7 +3,7 @@ from pathlib import Path
 import argparse
 
 def process_subject(subid, study_dir, intermediate, nospatial=False, verbose=False, debug=False):
-    cmd = ["python", "./process_osipi_subject.py",
+    cmd = ["fslpython", "./process_osipi_subject.py",
            "--study_dir", str(study_dir),
            "--subid", str(subid),
            "--intermediate", intermediate]
