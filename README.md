@@ -1,7 +1,7 @@
 # osipi_asl
-This repository contains pipelines which allow analysis for the OSIPI ASL Challenge 2021.
+This repository contains pipelines which carry out analysis for the OSIPI ASL Challenge 2021.
 
-The OSIPI ASL Challenge 2021 dataset consists of 1 Population-Averaged "subject" and 9 synthetic subjects.
+The OSIPI ASL Challenge 2021 dataset consists of 1 Population-Averaged subject and 9 synthetic subjects.
 An extensive description of the dataset can be found in [1], [2].
 
 ### Collaborators
@@ -43,7 +43,7 @@ We have installed the pipeline and all of its dependencies in a docker image to 
 There are only a couple of steps needed to run the docker image:
 
 * Install Docker: https://docs.docker.com/engine/installation/
-* Get the latest version of the pipeline: 
+* Get the latest version of the docker image: 
 > docker pull jacktoner/osipi:latest
 
 You now have a docker image containing our 2 processing pipelines!
