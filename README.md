@@ -44,7 +44,7 @@ There are only a couple of steps needed to run the docker image:
 
 * Install Docker: https://docs.docker.com/engine/installation/
 * Get the latest version of the docker image: 
-> docker pull jacktoner/osipi:latest
+> docker pull jacktonermhcn/osipi:latest
 
 You now have a docker image containing our 2 processing pipelines!
 
