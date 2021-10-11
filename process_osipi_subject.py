@@ -272,9 +272,9 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
         imcp_wrapper(subid, pve, results_dir/f"{t}_pv.nii.gz")
 
     # calculate standard deviation within tissue mask and write mean and std to file
-    pgm_mean, pwm_mean = [native_dir/f"perfusion_{t}_mean.txt" for t in ("calib_gm", "wm_calib_wm")]
+    pgm_mean, pwm_mean = [pvcorr_dir/f"perfusion_{t}_mean.txt" for t in ("calib_gm", "wm_calib_wm")]
     for t_perf, t_mean, t_mask, t in zip((pgm_perfusion_calib, pwm_perfusion_calib), (pgm_mean, pwm_mean), (gm_mask, wm_mask), ("GM", "WM")):
-        echo_cmd = ["echo",  f"\"$(cat {str(t_mean)})\"",  ">", str(results_dir/f"{t}_CBF.txt")]
+        echo_cmd = ["echo",  f"\"$(cat {str(t_mean)})\"",  ">", str(results_dir/f"{t}pv_CBF.txt")]
         run_cmd(subid, echo_cmd, shell=True)
         std_cmd = ["echo", f"\"$(fslstats {str(t_perf)} -k {str(t_mask)} -S)\"", ">>", str(results_dir/f"{t}pv_CBF.txt")]
         run_cmd(subid, std_cmd, shell=True)
