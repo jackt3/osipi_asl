@@ -2,18 +2,25 @@ import subprocess
 from pathlib import Path
 import argparse
 
-def process_subject(subid, study_dir, intermediate, nospatial=False, verbose=False, debug=False):
+def process_subject(subid, study_dir, intermediate, nospatial=False, quiet=True, debug=False):
+    """
+    Wrapper for the process_osipi_subject.py script which processes a single 
+    OSIPI subject's data.
+    """
+    # create process_osipi_subject.py call
     cmd = ["fslpython", "./process_osipi_subject.py",
            "--study_dir", str(study_dir),
            "--subid", str(subid),
            "--intermediate", intermediate]
     if nospatial:
         cmd.append("--nospatial")
-    if verbose:
-        cmd.append("--verbose")
+    if quiet:
+        cmd.append("--quiet")
     if debug:
         cmd.append("--debug")
+    # print the process_osipi_subject.py call to be run for sanity checking
     print(" ".join(cmd))
+    # process the subject's data using the process_osipi_subject.py script
     subprocess.run(cmd, check=True)
 
 if __name__ == "__main__":
@@ -30,9 +37,9 @@ if __name__ == "__main__":
     parser.add_argument("--nospatial",
                         help="If provided, oxford_asl run won't use spatial prior.",
                         action="store_true")
-    parser.add_argument("--verbose",
-                        help="If provided, the pipeline will print out statements on "
-                            +"what the pipeline is doing.",
+    parser.add_argument("--quiet",
+                        help="If provided, the pipeline won't print as much infomation "
+                            +"on what the pipeline is doing to the command line.",
                         action="store_true")
     parser.add_argument("--debug",
                         help="If provided, the pipeline will retain intermediate "
@@ -42,11 +49,14 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # data directories
+    # these are expected to be in the format 
+    # $OsipiDir/Challenge_Data/{Population_based, synthetic}/rawdata
+    # as provided for the OSIPI ASL Challenge 
     osipi_dir = Path(args.challenge_dir).resolve(strict=True)
     population_dir = (osipi_dir/"Population_based").resolve(strict=True)
     synthetic_dir = (osipi_dir/"synthetic").resolve(strict=True)
 
-    # list of subject IDs
+    # list of subject IDs and their corresponding study directory
     subjects = (("sub-PopulationAverage", population_dir),
                 ("sub-DRO1", synthetic_dir),
                 ("sub-DRO2", synthetic_dir),
@@ -58,11 +68,12 @@ if __name__ == "__main__":
                 ("sub-DRO8", synthetic_dir),
                 ("sub-DRO9", synthetic_dir))
 
-    # iterate over subjects running the pipeline on them
+    # iterate over subjects running the process_osipi_subject.py 
+    # pipeline on them
     for subid, study_dir in subjects:
         process_subject(subid=subid,
                         study_dir=study_dir,
                         intermediate=args.intermediate,
                         nospatial=args.nospatial,
-                        verbose=args.verbose,
+                        quiet=args.quiet,
                         debug=args.debug)

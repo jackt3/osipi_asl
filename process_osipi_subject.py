@@ -8,6 +8,7 @@ import numpy as np
 import nibabel as nb
 
 IAFS = ["diff", "tc", "ct"]
+# scan parameters for the population and synthetic datasets
 DATASETS = {
     "population": {"sequence": "2D PCASL",
                    "bsupp": {"npulses": 2, "efficiency": 0.95},
@@ -30,6 +31,7 @@ DATASETS = {
                   "rpts": 30,
                   "iaf": "ct"}
 }
+# subids and the study they are part of
 SUBJECTS = {"sub-PopulationAverage": "population",
             "sub-DRO1": "synthetic",
             "sub-DRO2": "synthetic",
@@ -41,37 +43,93 @@ SUBJECTS = {"sub-PopulationAverage": "population",
             "sub-DRO8": "synthetic",
             "sub-DRO9": "synthetic"}
 
-def masked_std(image_name, mask_name):
-    # load image and mask
-    image = nb.load(image_name)
-    mask = nb.load(mask_name)
-
-    # set values to NaN outside of mask
-    nanned_image = np.where(mask.get_fdata()==1, image.get_fdata(), np.nan)
-
-    return np.nanstd(nanned_image)
-
 def run_cmd(subid, cmd, shell=False):
+    """
+    Run the given `cmd`.
+
+    Parameters
+    ----------
+    subid: str
+        Subject ID. This is used to find the logger object and pass
+        the stdout of running the command to the logger.
+    cmd: tuple
+        The command to be run by subprocess.Popen.
+    shell: bool, False
+        This is an keyword argument passed to subprocess.Popen.
+    """
+    # get the logger object for the subject so we can pass the stdout
+    # from running `cmd` to the logger
     logger = logging.getLogger(subid)
+    # output the command itself to the logger
     logger.info(" ".join(cmd))
+    # if shell=True we need to convert the tuple `cmd` to a str
     if shell:
         cmd = " ".join(cmd)
+    # run `cmd`
     process = subprocess.Popen(cmd, shell=shell, stdout=subprocess.PIPE)
+    # get the output from running `cmd` and pass it to the logger
     while 1:
         retcode = process.poll()
         line = process.stdout.readline().decode("utf-8")
         logger.info(line)
         if line == "" and retcode is not None:
             break
+    # raise an exception if running `cmd` goes wrong
     if retcode != 0:
         logger.info(f"retcode={retcode}")
         logger.exception("Process failed.")
 
 def imcp_wrapper(subid, name1, name2):
+    """
+    Use imcp tool to copy image `name1` to `name2`.
+
+    Parameters
+    ----------
+    subid: str
+        Subject ID. This is used to find the logger object and pass
+        the stdout of running the command to the logger.
+    name1: str
+        Source name.
+    name2: str
+        Destination name.
+    """
     imcp_cmd = ["imcp", str(name1), str(name2)]
     run_cmd(subid, imcp_cmd)
 
-def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose=False, debug=False):
+def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=True, debug=False):
+    """
+    Perform analysis of `subid`'s data where `subid` is a subject in the
+    OSIPI ASL Challenge 2021.
+
+    The directory structure should be as provided for the challenge, 
+    more specific details below.
+
+    Parameters
+    ----------
+    study_dir: str
+        Path to the study directory for the subject under consideration.
+        This should be in the form: $OsipiDir/Challenge_Data/$Study where
+        Study={Population_based, synthetic}
+    subid: str
+        Subject ID where the rawdata can be found at 
+        $OsipiDir/Challenge_Data/$Study/rawdata/$subid
+    intermediate_dir: str
+        Intermediate directory in which to store results. By default, results
+        will be stored at $OsipiDir/Challenge_Data/$Study/processing/$subid.
+        If `intermediate_dir` is provided, they will instead be stored at
+        $OsipiDir/Challenge_Data/$Study/processing/$intermediate_dir/$subid.
+        Useful for testing different pipeline runs.
+    spatial: bool, True
+        If True, the spatial prior will be used in oxford_asl. It is recommended
+        this is used.
+    quiet: bool, True
+        If True, less information will be printed to the terminal. It will still
+        go to the logfile for inspection.
+    debug: bool, False
+        If True, intermediate processing files will be retained for debugging.
+        Otherwise, only the files required for submission to the Challenge
+        will be retained.
+    """
     #############################################################################
     ############################## general set up ###############################
     #############################################################################
@@ -87,26 +145,29 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
     results_dir = study_dir/"processing"/intermediate_dir/subid
     results_dir.mkdir(exist_ok=True, parents=True)
 
-    # set up logger
+    # set up logger for handling pipeline information and stdout
     logger_name = results_dir/f"{subid}.log"
     logger = logging.getLogger(subid)
     logger.setLevel(logging.INFO)
+    # direct stdout to logfile in format "time - message" using FileHandler
     formatter = logging.Formatter('%(asctime)s - %(message)s')
     fh = logging.FileHandler(logger_name, mode="w")
     handlers = [fh, ]
-    if verbose:
+    # if not in quiet mode, output stdout to terminal as well as logfile using StreamHandler
+    if not quiet:
         sh = logging.StreamHandler()
         handlers.append(sh)
     for handler in handlers:
         handler.setFormatter(formatter)
         logger.addHandler(handler)
 
-    # check `anat` and `perf` directories exist
+    # check `anat` and `perf` directories exist in expected location
+    # as provided by OSIPI Challenge
     logger.info("Checking `anat` and `perf` directories exist.")
     anat_dir = (sub_dir/"anat").resolve(strict=True)
     perf_dir = (sub_dir/"perf").resolve(strict=True)
 
-    # find subject's images
+    # find subject's T1w, asl and m0 images
     logger.info("Checking necessary images exist.")
     t1 = (anat_dir/f"{subid}_T1w.nii.gz").resolve(strict=True)
     asl = (perf_dir/f"{subid}_asl.nii.gz").resolve(strict=True)
@@ -116,11 +177,10 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
     # data not specified in the submission guidelines.
     # Required data will later be copied from here into 
     # the parent directory.
-    # TODO: Is there a BIDS convention for naming this kind of folder?
     intermediate_dir = results_dir/"intermediate_results"
     intermediate_dir.mkdir(exist_ok=True)
 
-    # some of the subject's ASL images have NaNs. Use fslmaths to convert
+    # some of the subjects' ASL images have NaNs. Use fslmaths to convert
     # NaNs in the ASL images to 0, otherwise BET fails in oxford_asl run
     logger.info("Converting any NaNs in the ASL image to 0.")
     asl_nonan = intermediate_dir/f"{subid}_asl_nonan.nii.gz"
@@ -141,7 +201,8 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
                         str(asl_nanmask)]
         run_cmd(subid, fslmaths_cmd)
 
-    # get scan parameters
+    # get scan parameters which depend on whether the subject
+    # is freom the population or synthetic datasets
     scan_type = SUBJECTS[subid]
     params = DATASETS[scan_type]
 
@@ -161,7 +222,9 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
                     "--nosubcortseg"]
     
     # if dealing with population data, we don't want robust FoV 
-    # cropping in fsl_anat
+    # cropping in fsl_anat - this gives a brainmask which crops 
+    # out the cerebellum due to the highly rotated structural 
+    # image
     if scan_type is "population":
         fsl_anat_cmd.append("--nocrop")
 
@@ -172,7 +235,8 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
     fsl_anat_end = time.time()
     logger.info(f"fsl_anat completed in {(fsl_anat_end-fsl_anat_start)/60:2f} minutes.")
     
-    # append '.anat' to fsl_anat output directory name
+    # append '.anat' to fsl_anat output directory name for 
+    # use in oxford_asl
     fsl_anat_out = fsl_anat_out.with_suffix(".anat")
 
     #############################################################################
@@ -202,14 +266,14 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
         oxford_asl_cmd.append("--debug")
 
     # if slicedt is in scan parameters, account for slice 
-    # timing in oxford_asl
+    # timing in oxford_asl - used for 2D multislice population data
     if params['slicedt']:
         oxford_asl_cmd.append(f"--slicedt={params['slicedt']}")
 
     # if bsupp is in scan parameters, account for efficiency 
     # of background suppression inversion recovery pulses in 
     # oxford_asl, using assumed efficiency of 95% for each 
-    # pulse
+    # pulse - used for 2D multislice population data
     if params['bsupp']:
         nbsupp, efficiency = params["bsupp"].values()
         oxford_asl_cmd.append(f"--alpha={0.85*(efficiency**nbsupp)}")
@@ -219,14 +283,14 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
     if not spatial:
         oxford_asl_cmd.append("--spatial=off")
     
-    # print oxford_asl command to terminal and get start time
+    # get oxford_asl start time
     logger.info("Running oxford_asl.")
     oxford_asl_start = time.time()
     
     # run oxford_asl command
     run_cmd(subid, oxford_asl_cmd, shell=True)
 
-    # print oxford_asl run time
+    # get oxford_asl run time
     oxford_asl_end = time.time()
     logger.info(f"oxford_asl completed in {(oxford_asl_end-oxford_asl_start)/60:2f} minutes.")
     
@@ -242,7 +306,7 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
     perfusion_calib = native_dir/"perfusion_calib.nii.gz"
     imcp_wrapper(subid, perfusion_calib, results_dir/"CBF.nii.gz")
 
-    # get GM and WM masks and move to expected location
+    # get GM and WM mask names and move to expected location
     gm_mask, wm_mask = [native_dir/f"{t}_roi.nii.gz" for t in ("gm", "wm")]
     for mask_src, tissue in zip((gm_mask, wm_mask), ("GM", "WM")):
         imcp_wrapper(subid, mask_src, results_dir/f"{tissue}_mask_lowres.nii.gz")
@@ -284,7 +348,8 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, verbose
         logger.info("Cleaning up intermediate files.")
         shutil.rmtree(intermediate_dir)
 
-    # end of processing pipeline!
+    # end of processing pipeline
+    # get total run time and pass exit message to logger
     end_time = time.time()
     logger.info(f"Processing completed! Time taken = {(end_time - start_time)/60:2f} minutes.")
 
@@ -306,9 +371,9 @@ if __name__ == '__main__':
     parser.add_argument("--nospatial",
                         help="If provided, oxford_asl run won't use spatial prior.",
                         action="store_true")
-    parser.add_argument("--verbose",
-                        help="If provided, the pipeline will print out statements on "
-                            +"what the pipeline is doing.",
+    parser.add_argument("--quiet",
+                        help="If provided, the pipeline won't print as much infomation "
+                            +"on what the pipeline is doing to the command line.",
                         action="store_true")
     parser.add_argument("--debug",
                         help="If provided, the pipeline will retain intermediate "
@@ -318,9 +383,10 @@ if __name__ == '__main__':
     
     # parse arguments
     args = parser.parse_args()
+    # run process_subject
     process_subject(study_dir=args.study_dir,
                     subid=args.subid,
                     intermediate_dir=args.intermediate,
                     spatial=not args.nospatial,
-                    verbose=args.verbose,
+                    quiet=args.quiet,
                     debug=args.debug)
