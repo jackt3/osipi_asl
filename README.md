@@ -55,7 +55,7 @@ It is simple to run each of the processing pipelines via the docker image.
         docker run --rm \
         -v $PWD/Challenge_Data:/osipi/Challenge_Data \ # share `Challenge_Data` directory on the host
                                                         \ # with the docker container
-        -t jacktoner/osipi:latest \ # name of the docker image you want to run
+        -t jacktonermhcn/osipi:latest \ # name of the docker image you want to run
         process_osipi_subject.py \ # run the single-subject processing pipeline
         --study_dir Challenge_Data/${Study} \ # location of the study directory within the container
         --subid ${subid} # Subject ID
@@ -66,7 +66,7 @@ It is simple to run each of the processing pipelines via the docker image.
         docker run --rm \
         -v $PWD/Challenge_Data:/osipi/Challenge_Data \ # share `Challenge_Data` directory on the host
                                                         \ # with the docker container
-        -t jacktoner/osipi:latest \ # name of the docker image you want to run
+        -t jacktonermhcn/osipi:latest \ # name of the docker image you want to run
         process_osipi_all.py \ # run the pipeline on all the OSIPI subjects
         --challenge_dir Challenge_Data \ # location of the challenge directory within the container
 
