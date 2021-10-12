@@ -19,9 +19,9 @@ There are 2 processing pipelines in this repository:
     ------------------|----------------|---------------
     `--study_dir`     | string         | Study directory within the OSIPI Challenge_Data directory, i.e. `$OsipiDir/Challenge_Data/${synthetic, Population_based}`
     `--subid`         | string         | Subject ID, i.e. `sub-DRO1`
-    `--intermediate`  | string         | Create an intermediate results directory, i.e. store results in `$PWD/Challenge_Data/$Study/processing/$IntermediateDir/$subid`
+    `--intermediate`  | string         | Create an intermediate results directory, i.e. store results in `$PWD/Challenge_Data/$Study/$IntermediateDir/$subid`
     `--nospatial`     | bool           | Turn off spatial prior in `oxford_asl`
-    `--verbose`       | bool           | Ouput print statements to the terminal
+    `--quiet`         | bool           | Don't ouput print statements to the terminal
     `--debug`         | bool           | Retain all intermediate results
 
 ## process_osipi_all.py
@@ -32,9 +32,9 @@ There are 2 processing pipelines in this repository:
     Argument          |  Type          |  Description
     ------------------|----------------|---------------
     `--challenge_dir` | string         | Challenge directory within the OSIPI directory, i.e. `$OsipiDir/Challenge_Data`. Should contain the `synthetic` and `Population_based` subdirectories as provided as part of the OSIPI ASL Challenge.
-    `--intermediate`  | string         | Create an intermediate results directory in which to save the results from each subject, i.e. store results in `$PWD/Challenge_Data/$Study/processing/$IntermediateDir/$subid`
+    `--intermediate`  | string         | Create an intermediate results directory in which to save the results from each subject, i.e. store results in `$PWD/Challenge_Data/$Study/$IntermediateDir/$subid`
     `--nospatial`     | bool           | Turn off spatial prior in `oxford_asl`
-    `--verbose`       | bool           | Ouput print statements to the terminal
+    `--quiet`         | bool           | Don't ouput print statements to the terminal
     `--debug`         | bool           | Retain all intermediate results
 
 # Docker Installation
@@ -60,7 +60,7 @@ It is simple to run each of the processing pipelines via the docker image.
         --study_dir Challenge_Data/${Study} \ # location of the study directory within the container
         --subid ${subid} # Subject ID
 
-    * The results of the pipeline should be found at `$PWD/Challenge_Data/$Study/processing/$subid`.
+    * The results of the pipeline should be found at `$PWD/Challenge_Data/$Study/$subid`.
 * process_osipi_all.py:
 
         docker run --rm \
