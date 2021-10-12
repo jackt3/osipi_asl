@@ -115,9 +115,9 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=T
         $OsipiDir/Challenge_Data/$Study/rawdata/$subid
     intermediate_dir: str
         Intermediate directory in which to store results. By default, results
-        will be stored at $OsipiDir/Challenge_Data/$Study/processing/$subid.
+        will be stored at $OsipiDir/Challenge_Data/$Study/$subid.
         If `intermediate_dir` is provided, they will instead be stored at
-        $OsipiDir/Challenge_Data/$Study/processing/$intermediate_dir/$subid.
+        $OsipiDir/Challenge_Data/$Study/$intermediate_dir/$subid.
         Useful for testing different pipeline runs.
     spatial: bool, True
         If True, the spatial prior will be used in oxford_asl. It is recommended
@@ -142,7 +142,7 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=T
     sub_dir = (rawdata_dir/f"{subid}").resolve(strict=True)
     
     # create processing results directory for main results
-    results_dir = study_dir/"processing"/intermediate_dir/subid
+    results_dir = study_dir/intermediate_dir/subid
     results_dir.mkdir(exist_ok=True, parents=True)
 
     # set up logger for handling pipeline information and stdout
