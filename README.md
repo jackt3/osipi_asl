@@ -3,6 +3,65 @@ This repository contains pipelines which carry out analysis for the OSIPI ASL Ch
 
 The OSIPI ASL Challenge 2021 dataset consists of 1 Population-Averaged subject and 9 synthetic subjects.
 An extensive description of the dataset can be found in [1], [2].
+The pipelines assume the data will be in the form as provided by the OSIPI ASL Challenge 2021:
+
+```
+OsipiDir
+|
+└───Challenge_Data
+    |
+    │   README.md
+    └───Population_based
+    |   |
+    |   └───rawdata
+    |       |   README
+    |       |   dataset_description.json
+    |       |
+    |       └───sub-PopulationAverage
+    |           └───anat
+    |           |   |   sub-PopulationAverage_T1w.json
+    |           |   |   sub-PopulationAverage_T1w.nii.gz
+    |           |
+    |           └───perf
+    |               |   sub-PopulationAverage_asl.json
+    |               |   sub-PopulationAverage_asl.nii.gz
+    |               |   sub-PopulationAverage_aslcontext.tsv
+    |               |   sub-PopulationAverage_m0scan.json
+    |               |   sub-PopulationAverage_m0scan.nii.gz
+    └───synthetic
+        |
+        └───rawdata
+            |   README
+            |   dataset_description.json
+            |
+            └───sub-DRO1
+            |   └───anat
+            |   |   |   sub-DRO1_T1w.json
+            |   |   |   sub-DRO1_T1w.nii.gz
+            |   |
+            |   └───perf
+            |       |   sub-DRO1_asl.json
+            |       |   sub-DRO1_asl.nii.gz
+            |       |   sub-DRO1_aslcontext.tsv
+            |       |   sub-DRO1_m0scan.json
+            |       |   sub-DRO1_m0scan.nii.gz
+            .
+            .
+            .
+            |
+            |
+            └───sub-DRO9
+                └───anat
+                |   |   sub-DRO9_T1w.json
+                |   |   sub-DRO9_T1w.nii.gz
+                |
+                └───perf
+                    |   sub-DRO9_asl.json
+                    |   sub-DRO9_asl.nii.gz
+                    |   sub-DRO9_aslcontext.tsv
+                    |   sub-DRO9_m0scan.json
+                    |   sub-DRO9_m0scan.nii.gz
+```
 
 ### Collaborators
 In alphabetical order: Jack Toner, Jian Hu, Xin Zhang
@@ -77,13 +136,13 @@ The results from running the pipeline this way may differ from OS to OS and if d
 
 ## Running Natively
 To run the pipeline natively, FSL should be installed and all environment variables set as expected.
-The `fslpython` environment can then be used to run the pipelines as follows:
+The `fslpython` environment can then be used to run the pipelines as follows where `CodeDir` should be the directory containing the processing scripts and `OsipiDir` should be the base OSIPI data directory as illustrated aboves:
 
-    fslpython $PWD/process_osipi_subject.py \ # run the single-subject processing pipeline
+    fslpython $CodeDir/process_osipi_subject.py \ # run the single-subject processing pipeline
     --study_dir $OsipiDir/Challenge_Data/${Study} \ # location of the study directory
     --subid ${subid} # Subject ID
 
-    fslpython $PWD/process_osipi_all.py \ # run the pipeline on all the OSIPI subjects
+    fslpython $CodeDir/process_osipi_all.py \ # run the pipeline on all the OSIPI subjects
     --challenge_dir $OsipiDir/Challenge_Data \ # location of the challenge directory within the container
 
 
