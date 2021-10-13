@@ -96,7 +96,7 @@ def imcp_wrapper(subid, name1, name2):
     imcp_cmd = ["imcp", str(name1), str(name2)]
     run_cmd(subid, imcp_cmd)
 
-def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=True, debug=False):
+def process_subject(study_dir, subid, intermediate_dir="", quiet=True, debug=False):
     """
     Perform analysis of `subid`'s data where `subid` is a subject in the
     OSIPI ASL Challenge 2021.
@@ -119,9 +119,6 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=T
         If `intermediate_dir` is provided, they will instead be stored at
         $OsipiDir/Challenge_Data/$Study/$intermediate_dir/$subid.
         Useful for testing different pipeline runs.
-    spatial: bool, True
-        If True, the spatial prior will be used in oxford_asl. It is recommended
-        this is used.
     quiet: bool, True
         If True, less information will be printed to the terminal. It will still
         go to the logfile for inspection.
@@ -278,11 +275,6 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=T
         nbsupp, efficiency = params["bsupp"].values()
         oxford_asl_cmd.append(f"--alpha={0.85*(efficiency**nbsupp)}")
     
-    # if not using spatial mode, turn this off in oxford_asl 
-    # as it's enabled by default
-    if not spatial:
-        oxford_asl_cmd.append("--spatial=off")
-    
     # get oxford_asl start time
     logger.info("Running oxford_asl.")
     oxford_asl_start = time.time()
@@ -368,9 +360,6 @@ if __name__ == '__main__':
                             +"By providing a different value for this argument on each "
                             +"run you can avoid overwriting the results from other runs.",
                         default="")
-    parser.add_argument("--nospatial",
-                        help="If provided, oxford_asl run won't use spatial prior.",
-                        action="store_true")
     parser.add_argument("--quiet",
                         help="If provided, the pipeline won't print as much infomation "
                             +"on what the pipeline is doing to the command line.",
@@ -387,6 +376,5 @@ if __name__ == '__main__':
     process_subject(study_dir=args.study_dir,
                     subid=args.subid,
                     intermediate_dir=args.intermediate,
-                    spatial=not args.nospatial,
                     quiet=args.quiet,
                     debug=args.debug)

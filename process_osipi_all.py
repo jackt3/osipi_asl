@@ -2,7 +2,7 @@ import subprocess
 from pathlib import Path
 import argparse
 
-def process_subject(subid, study_dir, intermediate, nospatial=False, quiet=True, debug=False):
+def process_subject(subid, study_dir, intermediate, quiet=True, debug=False):
     """
     Wrapper for the process_osipi_subject.py script which processes a single 
     OSIPI subject's data.
@@ -12,8 +12,6 @@ def process_subject(subid, study_dir, intermediate, nospatial=False, quiet=True,
            "--study_dir", str(study_dir),
            "--subid", str(subid),
            "--intermediate", intermediate]
-    if nospatial:
-        cmd.append("--nospatial")
     if quiet:
         cmd.append("--quiet")
     if debug:
@@ -34,9 +32,6 @@ if __name__ == "__main__":
                             +"By providing a different value for this argument on each "
                             +"run you can avoid overwriting the results from other runs.",
                         default="")
-    parser.add_argument("--nospatial",
-                        help="If provided, oxford_asl run won't use spatial prior.",
-                        action="store_true")
     parser.add_argument("--quiet",
                         help="If provided, the pipeline won't print as much infomation "
                             +"on what the pipeline is doing to the command line.",
@@ -74,6 +69,5 @@ if __name__ == "__main__":
         process_subject(subid=subid,
                         study_dir=study_dir,
                         intermediate=args.intermediate,
-                        nospatial=args.nospatial,
                         quiet=args.quiet,
                         debug=args.debug)

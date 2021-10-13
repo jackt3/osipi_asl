@@ -79,7 +79,6 @@ There are 2 processing pipelines in this repository:
     `--study_dir`     | string         | Study directory within the OSIPI Challenge_Data directory, i.e. `$OsipiDir/Challenge_Data/${synthetic, Population_based}`
     `--subid`         | string         | Subject ID, i.e. `sub-DRO1`
     `--intermediate`  | string         | Create an intermediate results directory, i.e. store results in `$OsipiDir/Challenge_Data/$Study/$IntermediateDir/$subid`
-    `--nospatial`     | bool           | Turn off spatial prior in `oxford_asl`
     `--quiet`         | bool           | Don't ouput print statements to the terminal
     `--debug`         | bool           | Retain all intermediate results
 
@@ -92,7 +91,6 @@ There are 2 processing pipelines in this repository:
     ------------------|----------------|---------------
     `--challenge_dir` | string         | Challenge directory within the OSIPI directory, i.e. `$OsipiDir/Challenge_Data`. Should contain the `synthetic` and `Population_based` subdirectories as provided as part of the OSIPI ASL Challenge.
     `--intermediate`  | string         | Create an intermediate results directory in which to save the results from each subject, i.e. store results in `$OsipiDir/Challenge_Data/$Study/$IntermediateDir/$subid`
-    `--nospatial`     | bool           | Turn off spatial prior in `oxford_asl`
     `--quiet`         | bool           | Don't ouput print statements to the terminal
     `--debug`         | bool           | Retain all intermediate results
 
