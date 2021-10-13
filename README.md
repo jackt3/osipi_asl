@@ -64,7 +64,7 @@ OsipiDir
 ```
 
 ### Collaborators
-In alphabetical order: Jack Toner, Jian Hu, Xin Zhang
+In alphabetical order: Jack Toner, Jian Hu
 
 # Pipelines
 There are 2 processing pipelines in this repository:
