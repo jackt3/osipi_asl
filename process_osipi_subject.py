@@ -318,7 +318,7 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=T
     for t_mean, t_mask, t in zip((gm_mean, wm_mean), (gm_mask, wm_mask), ("GM", "WM")):
         echo_cmd = ["echo",  f"\"$(cat {str(t_mean)})\"",  ">", str(results_dir/f"{t}_CBF.txt")]
         run_cmd(subid, echo_cmd, shell=True)
-        std_cmd = ["echo", f"\"$(fslstats {str(perfusion_calib)} -k {str(t_mask)} -S)\"", ">>", str(results_dir/f"{t}_CBF.txt")]
+        std_cmd = ["echo", f"\"$(fslstats {str(perfusion_calib)} -k {str(t_mask)} -s)\"", ">>", str(results_dir/f"{t}_CBF.txt")]
         run_cmd(subid, std_cmd, shell=True)
     
     ### partial volume corrected results
@@ -340,7 +340,7 @@ def process_subject(study_dir, subid, intermediate_dir="", spatial=True, quiet=T
     for t_perf, t_mean, t_mask, t in zip((pgm_perfusion_calib, pwm_perfusion_calib), (pgm_mean, pwm_mean), (gm_mask, wm_mask), ("GM", "WM")):
         echo_cmd = ["echo",  f"\"$(cat {str(t_mean)})\"",  ">", str(results_dir/f"{t}pv_CBF.txt")]
         run_cmd(subid, echo_cmd, shell=True)
-        std_cmd = ["echo", f"\"$(fslstats {str(t_perf)} -k {str(t_mask)} -S)\"", ">>", str(results_dir/f"{t}pv_CBF.txt")]
+        std_cmd = ["echo", f"\"$(fslstats {str(t_perf)} -k {str(t_mask)} -s)\"", ">>", str(results_dir/f"{t}pv_CBF.txt")]
         run_cmd(subid, std_cmd, shell=True)
 
     # if not in debug mode, delete intermediate_results directory
