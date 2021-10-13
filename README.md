@@ -108,7 +108,7 @@ You now have a docker image containing our 2 processing pipelines!
 ## Running via docker image
 It is simple to run each of the processing pipelines via the docker image.
 The call to `process_osipi_all.py` can be used to process all of the OSIPI subjects' data with the user only having to provide the path to `$OsipiDir` on their local machine as described below.
-The call to `process_osipi_subject.py` can be used to process a single OSIPI subject's data with the user substituting `${Study}` for `Population_based` or `synthetic` as described below as well as specifying `$OsipiDir`.
+The call to `process_osipi_subject.py` can be used to process a single OSIPI subject's data with the user substituting `${Study}` for `Population_based` or `synthetic` as described below as well as specifying `$OsipiDir` and `${subid}`.
 This is the recommended way to run the pipeline as it ensures the same OS and versions of tools will be used.
 
 ### Mounting the data directory
