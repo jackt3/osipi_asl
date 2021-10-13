@@ -249,6 +249,7 @@ def process_subject(study_dir, subid, intermediate_dir="", quiet=True, debug=Fal
                       f"--iaf={params['iaf']}",
                       f"--bolus={params['bolus']}",
                       "--fixbolus",
+                      "--fixbat",
                       f"--fslanat={str(fsl_anat_out)}",
                       "-c", str(m0),
                       f"--tr={params['tr_m0']}",
