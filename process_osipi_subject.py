@@ -324,7 +324,7 @@ def process_subject(study_dir, subid, intermediate_dir="", quiet=True, debug=Fal
     imcp_wrapper(subid, pwm_perfusion_calib, results_dir/"CBF_WMpv.nii.gz")
 
     # move T1w space PVEs
-    gm_pve, wm_pve = [fsl_anat_out/f"T1_fast_pve_{n}" for n in (0, 1)]
+    gm_pve, wm_pve = [fsl_anat_out/f"T1_fast_pve_{n}" for n in (1, 2)]
     for pve, t in zip((gm_pve, wm_pve), ("GM", "WM")):
         imcp_wrapper(subid, pve, results_dir/f"{t}_pv.nii.gz")
 
